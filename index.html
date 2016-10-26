@@ -1,0 +1,91 @@
+<html>
+	<head>
+		<meta content="text/html" charset="UTF-8" http-equiv="Content-Type">
+		<meta name="description" content="Yahoo Weather Forecast using jQuery and JSON">
+		<style>
+			#weather_info {
+                border: 1px solid black;
+            }
+            .city {
+                font-size: 100%;
+            }
+			.temp {
+				font-size: 270%;
+			}
+            .temp_type {
+                font-size: 100%;
+                vertical-align: top;
+            }
+            
+            .blur {
+                background-image: url(background.png);
+                backgroun-repeat: no-repeat;
+                background-size: cover;
+            
+                -webkit-filter: blur(10px);
+                   -moz-filter: blur(10px);
+                     -o-filter: blur(10px);
+                    -ms-filter: blur(10px);
+                        filter: blur(10px);
+            }
+            
+            #weather_info,
+            .blur {
+                position: absolute;
+                width: 120px;
+				height: 180px;
+                left: 0;
+                top: 0;
+                bottom: 0;
+                right: 0;
+            }
+		</style>
+	</head>
+	<body>
+		<script>
+		  function update_weather_info() {
+                var city = "Magnitogorsk";
+				var url = "https://query.yahooapis.com/v1/public/yql?q=select%20item%20from%20weather.forecast%20where%20woeid%20in%20(select%20woeid%20from%20geo.places(1)%20where%20text%3D'" + city + "')%20and%20u%3D'c'&format=json&diagnostics=true&callback=";
+          
+				var xhr = new XMLHttpRequest();
+				xhr.open('GET', url, true);
+				
+				xhr.onreadystatechange = function() {
+					if (xhr.readyState == 4 && xhr.status == 200) {
+						var data = JSON.parse(xhr.responseText);
+                        
+                        var condition = data.query.results.channel.item.condition;
+						var weather_temp_C = condition.temp;
+                        var weather_text = condition.text;
+                        var weather_image = '<img src="http://l.yimg.com/a/i/us/we/52/' + condition.code + '.gif">';
+             
+						var weather_info_block = "<div class='city'>" + city + "</div>";
+                        
+                        weather_info_block += "<table><tr><td>";
+                        weather_info_block += "<span class='temp'>" + weather_temp_C + "</span>";
+                        weather_info_block += "<sup class='temp_type'>°C</sup>";
+                        weather_info_block += "</td>";
+                        weather_info_block += "<td>";
+                        weather_info_block += weather_image;
+                        weather_info_block += "</td>";
+                        weather_info_block += "</tr></table>";
+                        
+                        weather_info_block += "<div class='weather_text'>" + weather_text + "</div>";
+
+                        document.querySelector('#weather_info').innerHTML = weather_info_block;
+					}
+				}
+				
+				xhr.send();
+                
+                // Every 15 minutes
+                setTimeout(update_weather_info, 15 * 60 * 1000);
+			}
+            
+            update_weather_info();
+		</script>
+        
+        <div class="blur"></div>
+		<div id="weather_info" align="center"></div>
+	</body>
+</html>
